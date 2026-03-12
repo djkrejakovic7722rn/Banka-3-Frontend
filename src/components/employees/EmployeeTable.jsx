@@ -2,15 +2,23 @@ import EmployeeRow from "./EmployeeRow";
 import "./EmployeeTable.css";
 
 function EmployeeTable({ employees }) {
+  if (employees.length === 0) {
+    return (
+      <div className="no-results">
+        <p>Nema zaposlenih koji odgovaraju vašoj pretrazi</p>
+      </div>
+    );
+  }
+
   return (
     <table className="employee-table">
       <thead>
         <tr>
-          <th>ID <span className="filter-icon">⏷</span></th>
-          <th>Ime <span className="filter-icon">⏷</span></th>
-          <th>Prezime <span className="filter-icon">⏷</span></th>
-          <th>Email <span className="filter-icon">⏷</span></th>
-          <th>Pozicija <span className="filter-icon">⏷</span></th>
+          <th>ID</th>
+          <th>Ime</th>
+          <th>Prezime</th>
+          <th>Email</th>
+          <th>Pozicija</th>
           <th className="actions-header"></th>
         </tr>
       </thead>
