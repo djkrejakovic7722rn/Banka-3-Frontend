@@ -20,7 +20,7 @@ export async function getEmployeeById(employeeId) {
     position: d.position,
     department: d.department || "",
     active: d.active,
-    dateOfBirth: d.date_of_birth || 0,
+    dateOfBirth: d.birth_date || d.date_of_birth || 0,
   };
 }
 
@@ -29,7 +29,7 @@ export async function createEmployee(data) {
   const response = await api.post("/employees", {
     first_name: data.firstName,
     last_name: data.lastName,
-    date_of_birth: data.dateOfBirth,
+    birth_date: data.dateOfBirth,
     gender: data.gender,
     email: data.email,
     phone_number: data.phoneNumber,
