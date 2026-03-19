@@ -3,11 +3,13 @@ import { useNavigate, useLocation, useParams  } from "react-router-dom";
 import { validatePasswordStrength } from "../utils/validators";
 import { confirmPasswordReset } from "../services/AuthService";
 import "./ChangePasswordPage.css";
+import MenuDropdown from "../components/MenuDropdown";
 import "./EmployeesPage.css";
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams();
 
   const { token } = location.state || {};
 
@@ -45,12 +47,10 @@ export default function ChangePasswordPage() {
     try {
       setSubmitting(true);
 
-
       await confirmPasswordReset({
         token,
         password: newPassword,
       });
-
 
       setSuccessMessage("Lozinka uspešno promenjena.");
       setNewPassword("");
@@ -63,11 +63,9 @@ export default function ChangePasswordPage() {
 
     } catch (error) {
       setSubmitError(
-
         error instanceof Error
           ? error.message
           : "Greška pri promeni lozinke."
-
       );
     } finally {
       setSubmitting(false);
@@ -77,15 +75,10 @@ export default function ChangePasswordPage() {
   return (
     <div className="page-bg">
       <img src="/bank-logo.png" alt="logo" className="bank-logo" />
-      <img src="/menu-icon.png" alt="menu" className="menu-icon" />
+      <MenuDropdown />
 
-
-      {/* STARO: cp-page-center + cp-card sa bež karticom */}
-      {/* NOVO: isti dark card sistem kao create/edit/details */}
       <div className="cp-page">
         <div className="cp-card">
-          {/* STARO: samo naslov */}
-          {/* NOVO: header blok kao na ostalim ekranima */}
           <div className="cp-header">
             <div className="cp-header-text">
               <p className="cp-eyebrow">PROMENA LOZINKE</p>
@@ -99,7 +92,7 @@ export default function ChangePasswordPage() {
               <button
                 type="button"
                 className="cp-btn cp-btn-secondary"
-                onClick={() => navigate(`/employees/${id}`)}
+                onClick={() => navigate(id ? `/employees/${id}` : "/login")}
               >
                 Nazad
               </button>
@@ -116,7 +109,6 @@ export default function ChangePasswordPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="unesite novu lozinku..."
-
                   required
                 />
               </div>
@@ -124,13 +116,11 @@ export default function ChangePasswordPage() {
               <div className="cp-field">
                 <label className="cp-label">Potvrdite novu lozinku</label>
                 <input
-
                   className={`cp-input ${matchError ? "cp-input-error" : ""}`}
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="potvrdite novu lozinku..."
-
                   required
                 />
               </div>
@@ -152,13 +142,9 @@ export default function ChangePasswordPage() {
             </div>
 
             <div className="cp-actions">
-
-              {/* STARO: cp-btn-back + cp-btn-submit */}
-              {/* NOVO: shared dark/blue button family */}
               <button
                 type="submit"
                 className="cp-btn cp-btn-primary"
-
                 disabled={submitting}
               >
                 {submitting ? "Čuvanje..." : "Promeni lozinku"}

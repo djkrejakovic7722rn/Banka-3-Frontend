@@ -32,33 +32,32 @@ export default function AppRouter() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin-loans" element={<ProtectedRoute><AdminLoansPage /></ProtectedRoute>} />
+        <Route path="/admin-loans" element={<ProtectedRoute requiredRole="employee"><AdminLoansPage /></ProtectedRoute>} />
 
-        <Route path="/forgot-password" element={<ProtectedRoute><ForgotPasswordPage /></ProtectedRoute>} />
-        <Route path="/enter-token" element={<ProtectedRoute><EnterTokenPage /></ProtectedRoute>} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/enter-token" element={<EnterTokenPage />} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
 
-        <Route path="/dashboard" element={<ProtectedRoute><ClientDashboardPage /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
 
-        <Route path="/loan-request" element={<ProtectedRoute><LoanApplicationPage /></ProtectedRoute>} />
-        <Route path="/accounts" element={<ProtectedRoute><AccountsPage /></ProtectedRoute>} />
-        <Route path="/loans" element={<ProtectedRoute><LoanOverview /></ProtectedRoute>} />
-        <Route path="/accounts/create" element={<ProtectedRoute><CreateAccountPage /></ProtectedRoute>} />
-        <Route path="/admin/accounts/:accountNumber" element={<ProtectedRoute><AdminAccountDetailsPage /></ProtectedRoute>} />
-        <Route path="/employees" element={<ProtectedRoute><EmployeesPage /></ProtectedRoute>} />
-        <Route path="/employees/create" element={<ProtectedRoute><CreateEmployeePage /></ProtectedRoute>} />
-        <Route path="/employees/edit/:id" element={<ProtectedRoute><EditEmployeePage /></ProtectedRoute>} />
-        <Route path="/employees/:id/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
-        <Route path="/employees/:id" element={<ProtectedRoute><EmployeeDetailsPage /></ProtectedRoute>} />
-        <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
-        <Route path="/recipients" element={<ProtectedRoute><RecipientsPage /></ProtectedRoute>} />
-        <Route path="/payments" element={<ProtectedRoute><PaymentsPage /></ProtectedRoute>} />
+        <Route path="/loan-request" element={<ProtectedRoute requiredRole="client"><LoanApplicationPage /></ProtectedRoute>} />
+        <Route path="/accounts" element={<ProtectedRoute requiredRole="client"><AccountsPage /></ProtectedRoute>} />
+        <Route path="/loans" element={<ProtectedRoute requiredRole="client"><LoanOverview /></ProtectedRoute>} />
+        <Route path="/accounts/create" element={<ProtectedRoute requiredRole="client"><CreateAccountPage /></ProtectedRoute>} />
+        <Route path="/admin/accounts/:accountNumber" element={<ProtectedRoute requiredRole="employee"><AdminAccountDetailsPage /></ProtectedRoute>} />
+        <Route path="/employees" element={<ProtectedRoute requiredRole="employee"><EmployeesPage /></ProtectedRoute>} />
+        <Route path="/employees/create" element={<ProtectedRoute requiredRole="employee"><CreateEmployeePage /></ProtectedRoute>} />
+        <Route path="/employees/edit/:id" element={<ProtectedRoute requiredRole="employee"><EditEmployeePage /></ProtectedRoute>} />
+        <Route path="/employees/:id/change-password" element={<ProtectedRoute requiredRole="employee"><ChangePasswordPage /></ProtectedRoute>} />
+        <Route path="/employees/:id" element={<ProtectedRoute requiredRole="employee"><EmployeeDetailsPage /></ProtectedRoute>} />
+        <Route path="/recipients" element={<ProtectedRoute requiredRole="client"><RecipientsPage /></ProtectedRoute>} />
+        <Route path="/payments" element={<ProtectedRoute requiredRole="client"><PaymentsPage /></ProtectedRoute>} />
         <Route path="/accounts/business/:id" element={<ProtectedRoute><BusinessDetailsPage /></ProtectedRoute>}/>
-        <Route path="/cards" element={<ProtectedRoute><CardsPage /></ProtectedRoute>} />
-        <Route path="/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+        <Route path="/cards" element={<ProtectedRoute requiredRole="client"><CardsPage /></ProtectedRoute>} />
+        <Route path="/payment" element={<ProtectedRoute requiredRole="client"><PaymentPage /></ProtectedRoute>} />
 
-        <Route path="/accounts/:id" element={<ProtectedRoute><AccountDetailsPage /></ProtectedRoute>} />
-        <Route path="/exchange" element={<ProtectedRoute><ExchangePage /></ProtectedRoute>} />
+        <Route path="/accounts/:id" element={<ProtectedRoute requiredRole="client"><AccountDetailsPage /></ProtectedRoute>} />
+        <Route path="/exchange" element={<ProtectedRoute requiredRole="client"><ExchangePage /></ProtectedRoute>} />
 
       </Routes>
     </BrowserRouter>

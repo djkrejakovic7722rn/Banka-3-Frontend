@@ -1,7 +1,7 @@
 import api from "./api.js";
 
-export async function getEmployees() {
-  const response = await api.get("/employees");
+export async function getEmployees(params = {}) {
+  const response = await api.get("/employees", { params });
   return response.data.employees ?? response.data;
 }
 
@@ -20,7 +20,7 @@ export async function getEmployeeById(employeeId) {
     position: d.position,
     department: d.department || "",
     active: d.active,
-    dateOfBirth: d.date_of_birth || 0,
+    dateOfBirth: d.birth_date || d.date_of_birth || 0,
   };
 }
 
@@ -29,7 +29,7 @@ export async function createEmployee(data) {
   const response = await api.post("/employees", {
     first_name: data.firstName,
     last_name: data.lastName,
-    date_of_birth: data.dateOfBirth,
+    birth_date: data.dateOfBirth,
     gender: data.gender,
     email: data.email,
     phone_number: data.phoneNumber,
@@ -44,6 +44,7 @@ export async function createEmployee(data) {
 
 export async function updateEmployee(id, data) {
   const response = await api.put(`/employees/${id}`, {
+    first_name: data.firstName,
     last_name: data.lastName,
     gender: data.gender,
     phone_number: data.phoneNumber,
@@ -51,6 +52,7 @@ export async function updateEmployee(id, data) {
     position: data.position,
     department: data.department,
     active: data.active,
+    permissions: data.permissions,
   });
   return response.data;
 }
