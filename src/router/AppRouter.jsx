@@ -11,6 +11,7 @@ import EditEmployeePage from "../pages/EditEmployeePage.jsx";
 import ChangePasswordPage from "../pages/ChangePasswordPage.jsx";
 import CardsPage from "../pages/CardsPage.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import AdminLoansPage from "../pages/AdminLoansPage.jsx";
 import LoanApplicationPage from "../pages/LoanApplicationPage.jsx"
 import BusinessDetailsPage from "../pages/BusinessDetailsPage.jsx";
 import CreateBusinessAccountPage from "../pages/CreateBusinessAccountPage";
@@ -29,6 +30,8 @@ export default function AppRouter() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin-loans" element={<ProtectedRoute><AdminLoansPage /></ProtectedRoute>} />
+
         <Route path="/forgot-password" element={<ProtectedRoute><ForgotPasswordPage /></ProtectedRoute>} />
         <Route path="/enter-token" element={<ProtectedRoute><EnterTokenPage /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
