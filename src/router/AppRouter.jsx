@@ -28,9 +28,9 @@ export default function AppRouter() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/enter-token" element={<EnterTokenPage />} />
-        <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route path="/forgot-password" element={<ProtectedRoute><ForgotPasswordPage /></ProtectedRoute>} />
+        <Route path="/enter-token" element={<ProtectedRoute><EnterTokenPage /></ProtectedRoute>} />
+        <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
 
         <Route path="/dashboard" element={<ProtectedRoute><ClientDashboardPage /></ProtectedRoute>} />
 
