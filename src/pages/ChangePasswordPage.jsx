@@ -1,27 +1,16 @@
-import { useState } from "react";
-import { useNavigate, useLocation, useParams, useSearchParams  } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { validatePasswordStrength } from "../utils/validators";
 import { confirmPasswordReset } from "../services/AuthService";
 import "./ChangePasswordPage.css";
-import MenuDropdown from "../components/MenuDropdown";
-import "./EmployeesPage.css";
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
   const [searchParams] = useSearchParams();
 
   // Token prioritet: URL query param > location.state
   const token = searchParams.get("token") || (location.state && location.state.token);
-
-   // zaštita ako neko direktno uđe na stranicu
-   if (!token) {
-     navigate("/login");
-    return null;
-   }
-
-  const isAdminFlow = !!id;
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,6 +19,16 @@ export default function ChangePasswordPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/login", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (!token) {
+    return null;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +56,6 @@ export default function ChangePasswordPage() {
       setNewPassword("");
       setConfirmPassword("");
 
-      // opciono redirect posle par sekundi
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -75,15 +73,12 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="page-bg">
-      {isAdminFlow && <img src="/bank-logo.png" alt="logo" className="bank-logo" />}
-      {isAdminFlow && <MenuDropdown />}
-
       <div className="cp-page">
         <div className="cp-card">
           <div className="cp-header">
             <div className="cp-header-text">
-              <p className="cp-eyebrow">PROMENA LOZINKE</p>
-              <h1 className="cp-title">Promeni lozinku</h1>
+              <p className="cp-eyebrow">POSTAVLJANJE LOZINKE</p>
+              <h1 className="cp-title">Postavite lozinku</h1>
               <p className="cp-subtitle">
                 Unesite novu lozinku i potvrdu kako biste ažurirali pristup nalogu.
               </p>
@@ -93,7 +88,7 @@ export default function ChangePasswordPage() {
               <button
                 type="button"
                 className="cp-btn cp-btn-secondary"
-                onClick={() => navigate(id ? `/employees/${id}` : "/login")}
+                onClick={() => navigate("/login")}
               >
                 Nazad
               </button>
@@ -148,7 +143,7 @@ export default function ChangePasswordPage() {
                 className="cp-btn cp-btn-primary"
                 disabled={submitting}
               >
-                {submitting ? "Čuvanje..." : "Promeni lozinku"}
+                {submitting ? "Čuvanje..." : "Potvrdi lozinku"}
               </button>
             </div>
           </form>

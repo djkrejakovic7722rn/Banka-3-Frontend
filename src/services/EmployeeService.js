@@ -37,7 +37,6 @@ export async function createEmployee(data) {
     username: data.username,
     position: data.position,
     department: data.department,
-    password: data.password,
   });
   return response.data;
 }
