@@ -25,6 +25,8 @@ import ClientDashboardPage from "../pages/ClientDashboardPage.jsx";
 import ExchangePage from "../pages/ExchangePage.jsx";
 import PaymentPage from "../pages/PaymentPage.jsx";
 
+import SecurityDetailPage from "../pages/SecurityDetailPage.jsx";
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -59,6 +61,7 @@ export default function AppRouter() {
         <Route path="/accounts/:id" element={<ProtectedRoute requiredRole="client"><AccountDetailsPage /></ProtectedRoute>} />
         <Route path="/exchange" element={<ProtectedRoute requiredRole="client"><ExchangePage /></ProtectedRoute>} />
 
+        <Route path="/securities/:ticker" element={<ProtectedRoute requiredRole="employee"><SecurityDetailPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
