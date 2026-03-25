@@ -109,6 +109,7 @@ const BusinessAccountDetailsPage = () => {
           ))}
         </div>
       </div>
+       </div>
   );
 };
 
