@@ -12,6 +12,8 @@ import api from "./api.js";
  * @param {string} data.purpose
  */
 export async function transferFunds(data) {
-    const response = await api.post("/transactions/payment", data);
-    return response.data;
+    // Gateway: POST /api/transactions/payments ili /transfers
+    // Na osnovu tvog gateway koda, trenutno su Not Implemented, 
+    // ali evo kako treba da izgleda poziv:
+    return api.post("/transactions/payments", data);
 }

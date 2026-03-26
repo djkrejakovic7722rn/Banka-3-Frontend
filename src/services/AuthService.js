@@ -3,10 +3,13 @@ import { clearClientCache } from "./ClientService.js";
 
 export const login = async (email, password) => {
   const response = await api.post("/login", { email, password });
+  
+  // PAŽNJA: Proveri velika/mala slova. 
+  // Tvoj Gateway (handlers.go:193) šalje "accessToken", ne "access_token"
   return {
-    accessToken: response.data.access_token,
-    refreshToken: response.data.refresh_token,
-    userId: response.data.user_id,
+    accessToken: response.data.accessToken,   // Promenjeno sa access_token
+    refreshToken: response.data.refreshToken, // Promenjeno sa refresh_token
+    userId: response.data.userId,             
   };
 };
 

@@ -58,9 +58,14 @@ export default function ClientDashboardPage() {
                 if (cancelled) return;
                 setAccounts(accountsData);
 
-                if (accountsData.length > 0) {
-                    const txData = await getAccountTransactions(accountsData[0].id);
-                    if (!cancelled) setTransactions(txData);
+                // OVO JE BITNO: Proveri da li ima bar jedan račun
+                if (accountsData && accountsData.length > 0) {
+                    // Uzmi account_number (snake_case kako backend šalje)
+                    const firstAcc = accountsData[0].account_number;
+                    
+                    // Pozovi transakcije sa tim brojem
+                    const txData = await getAccountTransactions(firstAcc); 
+                    setTransactions(txData || []);
                 }
             } catch (err) {
                 if (!cancelled) setError("Greška pri učitavanju podataka.");
@@ -197,11 +202,19 @@ export default function ClientDashboardPage() {
                 </div>
                 <div className="dash-accounts-scroll">
                     {accounts.map((acc) => (
-                        <button key={acc.id} className="dash-account-pill"
-                                onClick={() => navigate(`/accounts/${acc.id}`)}>
-                            <p className="dash-pill-name">{acc.name}</p>
-                            <p className="dash-pill-number">{acc.number}</p>
-                            <p className="dash-pill-bal">{fmt(acc.balance, acc.currency)}</p>
+                        <button 
+                            // Koristimo account_number jer je to jedinstveni string iz tvog JSON-a
+                            key={acc.account_number} 
+                            className="dash-account-pill"
+                            // Navigacija na dugački broj računa
+                            onClick={() => navigate(`/accounts/${acc.account_number}`)} 
+                        >
+                            <p className="dash-pill-name">{acc.account_name}</p>
+                            <p className="dash-pill-number">{acc.account_number}</p>
+                            <p className="dash-pill-bal">
+                            {/* Koristi balans i valutu direktno iz JSON-a */}
+                            {fmt(acc.balance, acc.currency)}
+                            </p>
                         </button>
                     ))}
                 </div>
@@ -224,8 +237,8 @@ export default function ClientDashboardPage() {
                     <p className="dash-section-title">Poslednje transakcije</p>
                 </div>
                 <div className="dash-tx-list">
-                    {transactions.slice(0, 5).map((tx) => (
-                        <div key={tx.id} className="dash-tx-row">
+                    {(Array.isArray(transactions) ? transactions : []).slice(0, 5).map((tx, index) => (
+                        <div key={tx.transaction_code || `${tx.id}-${index}`} className="dash-tx-row">
                             <div className={`dash-tx-icon ${tx.amount > 0 ? "dash-tx-icon--in" : "dash-tx-icon--out"}`}>
                                 {tx.amount > 0 ? (
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
