@@ -8,11 +8,6 @@ export async function getAccounts() {
     return response.data;
 }
 
-export async function getAccountById(accountNumber) {
-  // accountNumber ovde treba da bude "333000112345678910"
-  const response = await api.get(`/accounts/${accountNumber}`);
-  return response.data;
-}
 
 export async function getAccountTransactions(accountNumber) {
   try {

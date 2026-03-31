@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAccountById, getAccountTransactions } from "../services/AccountService";
+import { getAccountByNumber, getAccountTransactions } from "../services/AccountService";
 import Sidebar from "../components/Sidebar.jsx";
 import "./AccountDetailsPage.css";
 
@@ -18,7 +18,7 @@ function fmt(amount, currency = "RSD") {
 }
 
 export default function AccountDetailsPage() {
-    const { id } = useParams(); // 'id' je string broj računa iz URL-a
+    const { accountNumber } = useParams(); // 'id' je string broj računa iz URL-a
     const navigate = useNavigate();
 
     const [account, setAccount] = useState(null);
@@ -27,15 +27,15 @@ export default function AccountDetailsPage() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!id) return; 
+        if (!accountNumber) return;
         let cancelled = false;
 
         const load = async () => {
             try {
                 // BITNO: id (broj računa) šaljemo kao string da ne izgubimo preciznost
                 const [acc, txs] = await Promise.all([
-                    getAccountById(id),           
-                    getAccountTransactions(id), 
+                    getAccountByNumber(accountNumber),
+                    getAccountTransactions(accountNumber),
                 ]);
                 
                 if (!cancelled) {
@@ -53,7 +53,7 @@ export default function AccountDetailsPage() {
 
         load();
         return () => { cancelled = true; };
-    }, [id]);
+    }, [accountNumber]);
 
     if (loading) {
         return (
