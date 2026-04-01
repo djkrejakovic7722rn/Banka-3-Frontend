@@ -100,7 +100,7 @@ export default function CreateEmployeePage() {
         dateOfBirth = `${yyyy}-${mm}-${dd}`;
       }
 
-      const response = await createEmployee({
+      await createEmployee({
         firstName: form.ime,
         lastName: form.prezime,
         dateOfBirth,

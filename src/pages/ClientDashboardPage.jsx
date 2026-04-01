@@ -67,7 +67,7 @@ export default function ClientDashboardPage() {
                     const txData = await getAccountTransactions(firstAcc); 
                     setTransactions(txData || []);
                 }
-            } catch (err) {
+            } catch {
                 if (!cancelled) setError("Greška pri učitavanju podataka.");
             } finally {
                 if (!cancelled) setLoading(false);
@@ -209,7 +209,11 @@ export default function ClientDashboardPage() {
                             key={acc.account_number} 
                             className="dash-account-pill"
                             // Navigacija na dugački broj računa
-                            onClick={() => navigate(`/accounts/${acc.account_number}`)} 
+                            onClick={() =>
+                                navigate(`/accounts/${acc.account_number}`, {
+                                    state: { from: "/dashboard" },
+                                })
+                            }
                         >
                             <p className="dash-pill-name">{acc.account_name}</p>
                             <p className="dash-pill-number">{acc.account_number}</p>

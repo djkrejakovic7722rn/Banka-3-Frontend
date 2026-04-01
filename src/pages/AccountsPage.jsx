@@ -23,7 +23,6 @@ export default function AccountsPage() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -46,24 +45,28 @@ export default function AccountsPage() {
     [accounts]
   );
 
-  const uniqueStatuses = useMemo(() =>
-    [...new Set(accounts.map((a) => a.status).filter(Boolean))].sort(),
-    [accounts]
-  );
 
   const filtered = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    return accounts.filter((a) => {
-      const matchesSearch =
-        !term ||
-        a.account_number?.toLowerCase().includes(term) ||
-        a.account_name?.toLowerCase().includes(term) ||
-        String(a.owner_id).includes(term);
-      const matchesType = !filterType || a.account_type === filterType;
-      const matchesStatus = !filterStatus || a.status === filterStatus;
-      return matchesSearch && matchesType && matchesStatus;
-    });
-  }, [accounts, searchTerm, filterType, filterStatus]);
+
+    return accounts
+        .filter((a) => {
+          const isActive =
+              String(a.status || "").toLowerCase() === "active" ||
+              String(a.status || "").toLowerCase() === "aktivan";
+
+          const matchesSearch =
+              !term ||
+              a.account_number?.toLowerCase().includes(term) ||
+              a.account_name?.toLowerCase().includes(term) ||
+              String(a.owner_id).includes(term);
+
+          const matchesType = !filterType || a.account_type === filterType;
+
+          return isActive && matchesSearch && matchesType;
+        })
+        .sort((a, b) => (Number(b.balance) || 0) - (Number(a.balance) || 0));
+  }, [accounts, searchTerm, filterType]);
 
   return (
     <div className="accs-shell">
@@ -71,8 +74,15 @@ export default function AccountsPage() {
         <Sidebar/>
 
         <div className="accs-header">
+          <button
+              className="ad-back-btn"
+              onClick={() => navigate("/dashboard")}
+          >
+            <ChevronLeftIcon />
+          </button>
+
           <div className="accs-title-block">
-            <p>Administracija</p>
+            <p>Moji računi</p>
             <h1>Pregled računa</h1>
           </div>
         </div>
@@ -103,20 +113,10 @@ export default function AccountsPage() {
             ))}
           </select>
 
-          <select
-            className="accs-select"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="">Svi statusi</option>
-            {uniqueStatuses.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
 
           <button
             className="accs-reset-btn"
-            onClick={() => { setSearchTerm(""); setFilterType(""); setFilterStatus(""); }}
+            onClick={() => { setSearchTerm(""); setFilterType(""); }}
           >
             Reset
           </button>
@@ -153,7 +153,11 @@ export default function AccountsPage() {
                     <tr
                       key={a.account_number}
                       className="accs-row"
-                      onClick={() => navigate(`/admin/accounts/${a.account_number}`)}
+                      onClick={() =>
+                          navigate(`/accounts/${a.account_number}`, {
+                            state: { from: "/accounts" },
+                          })
+                      }
                     >
                       <td className="accs-number">{a.account_number}</td>
                       <td>{a.account_name}</td>
@@ -176,5 +180,21 @@ export default function AccountsPage() {
 
       </div>
     </div>
+  );
+}
+function ChevronLeftIcon() {
+  return (
+      <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
   );
 }

@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
       setTimeout(() => {
         navigate("/enter-token");
       }, 2000);
-    } catch (err) {
+    } catch {
       setMessage("Greška pri slanju tokena.");
     }
   };

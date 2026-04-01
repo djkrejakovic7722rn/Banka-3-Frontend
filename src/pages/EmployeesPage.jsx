@@ -22,7 +22,7 @@ function EmployeesPage() {
         if (!controller.signal.aborted) {
           setEmployees(data);
         }
-      } catch (err) {
+      } catch {
         if (!controller.signal.aborted) {
           setError("Greška pri učitavanju zaposlenih.");
         }

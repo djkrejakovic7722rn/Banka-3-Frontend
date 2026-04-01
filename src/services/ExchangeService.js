@@ -33,7 +33,7 @@ export async function performExchange(from, to, amount) {
 }
 
 // 4. Promena statusa berze (OVO JE FALILO - trenutno MOCK)
-export async function updateExchangeStatus(exchangeId, isOpen) {
+export async function updateExchangeStatus() {
   console.warn("updateExchangeStatus: Ruta ne postoji na backendu.");
   return { success: true };
 }

@@ -19,7 +19,7 @@ const BusinessAccountDetailsPage = () => {
     try {
       const data = await getAccountDetails(id);
       setAccount(data);
-    } catch (err) {
+    } catch {
       setError("Greška pri učitavanju podataka o računu.");
     } finally {
       setLoading(false);

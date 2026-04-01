@@ -28,7 +28,7 @@ export default function ExchangePage() {
     const [fromAccount, setFromAccount] = useState("");
     const [toAccount, setToAccount] = useState("");
     const [amount, setAmount] = useState("");
-    const [result, setResult] = useState(null);
+    const [, setResult] = useState(null);
     const [loading, setLoading] = useState(true);
     const [exchanging, setExchanging] = useState(false);
     const [error, setError] = useState("");

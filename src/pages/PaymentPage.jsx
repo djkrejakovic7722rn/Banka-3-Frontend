@@ -102,7 +102,7 @@ export default function PaymentPage() {
 
                 {/* Header */}
                 <div className="pay-header">
-                    <button className="pay-back-btn" onClick={() => navigate("/dashboard")}>
+                    <button className="pay-back-btn" onClick={() => navigate(-1)}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M15 18l-6-6 6-6" />
@@ -255,7 +255,7 @@ export default function PaymentPage() {
                     {submitError && <p className="pay-error pay-error--submit">{submitError}</p>}
 
                     <div className="pay-actions">
-                        <button type="button" className="pay-btn-back" onClick={() => navigate("/dashboard")}>
+                        <button type="button" className="pay-btn-back" onClick={() => navigate(-1)}>
                             Otkaži
                         </button>
                         <button type="submit" className="pay-btn-submit" disabled={submitting}>
