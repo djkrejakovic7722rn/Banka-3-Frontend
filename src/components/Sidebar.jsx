@@ -74,17 +74,29 @@ export default function MenuDropdown() {
     }
 
     if (role === "employee") {
-      sections.push(
-          { title: "Računi", items: [
-              { label: "Svi računi", path: "/admin/accounts" },
-              { label: "Kreiraj račun", path: "/accounts/create" },
-            ]},
-          { title: "Kartice", items: [{ label: "Upravljanje karticama", path: "/cards" }] },
-          { title: "Krediti", items: [
-              { label: "Zahtevi za kredit", path: "/admin-loans" },
-              { label: "Svi krediti", path: "/loans" },
-            ]},
-      );
+      return [
+        {
+          title: "Računi",
+          items: [
+            { label: "Svi računi", path: "/accounts" },
+            { label: "Kreiraj račun", path: "/accounts/create" },
+          ],
+        },
+        {
+          title: "Kartice",
+          items: [
+            { label: "Upravljanje karticama", path: "/cards" },
+          ],
+        },
+        {
+          title: "Krediti",
+          items: [
+            { label: "Zahtevi za kredit", path: "/employee-loans" },
+            { label: "Svi krediti", path: "/employee-loans-list" },
+          ],
+        },
+      ];
+    }
 
       // Samo admin vidi upravljanje zaposlenima i klijentima
       if (isAdmin) {
