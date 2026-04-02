@@ -29,8 +29,8 @@ export async function getClients() {
 
 export async function getClientById(id) {
   const response = await api.get('/clients');
-  const clientData = response.data.clients
-    ? response.data.clients.find((c) => c.id === parseInt(id))
+  const clientData = response.data
+    ? response.data.find((c) => c.id === parseInt(id))
     : response.data;
   return normalizeClient(clientData);
 }
