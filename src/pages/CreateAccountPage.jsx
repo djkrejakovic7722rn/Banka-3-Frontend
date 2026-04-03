@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState,useEffect  } from "react";
 import { useNavigate } from "react-router-dom";
 import { createAccount } from "../services/AccountService";
-import { getCurrentUserId } from "../services/AuthService";
 import Sidebar from "../components/Sidebar.jsx";
 import "./CreateAccountPage.css";
+import { getClients } from "../services/ClientService";
+
+
 
 const ACCOUNT_TYPES = [
     {
@@ -90,10 +92,11 @@ const COMPANY_SUBTYPES = [
     { value: "AD", label: "A.D.", desc: "Akcionarsko društvo" },
 ];
 
-function validate(type, currency, ownerType, subtype, companySubtype) {
+function validate(type, currency, ownerType, subtype, companySubtype ,clientId) {
     const errors = {};
 
     if (!type) errors.type = "Izaberite tip računa.";
+    if (!clientId) errors.client = "Izaberite klijenta.";
     if (type === "DEVIZNI" && !currency) errors.currency = "Izaberite valutu.";
     if (!ownerType) errors.ownerType = "Izaberite tip vlasnika.";
     if (ownerType === "PERSONAL" && !subtype) errors.subtype = "Izaberite podtip računa.";
@@ -105,6 +108,10 @@ function validate(type, currency, ownerType, subtype, companySubtype) {
 
 export default function CreateAccountPage() {
     const navigate = useNavigate();
+
+    const [clients, setClients] = useState([]);
+    const [selectedClientId, setSelectedClientId] = useState("");
+
 
     const [accountType, setAccountType] = useState("");
     const [currency, setCurrency] = useState("");
@@ -118,7 +125,21 @@ export default function CreateAccountPage() {
     const [monthlyLimit, setMonthlyLimit] = useState("");
     const [createCard, setCreateCard] = useState(false);
     const [companySubtype, setCompanySubtype] = useState("");
+    const [success, setSuccess] = useState(false);
 
+
+
+    useEffect(() => {
+        async function fetchClients() {
+            try {
+                const data = await getClients();
+                setClients(data);
+            } catch (err) {
+                console.error("Greška pri učitavanju klijenata:", err);
+            }
+        }
+        fetchClients();
+    }, []);
 
     function handleTypeSelect(value) {
         setAccountType(value);
@@ -150,24 +171,27 @@ export default function CreateAccountPage() {
         e.preventDefault();
         setSubmitError("");
 
-        const errs = validate(accountType, currency, ownerType, subtype, companySubtype);
+
+        const errs = validate(accountType, currency, ownerType, subtype, companySubtype, selectedClientId);
         if (Object.keys(errs).length > 0) {
             setErrors(errs);
             return;
         }
 
+
         try {
             setSubmitting(true);
-            const userId = getCurrentUserId();
+            const userId = selectedClientId;
             if (!userId) {
-                throw new Error("Niste ulogovani. Prijavite se ponovo.");
+                setSubmitError("Morate izabrati klijenta.");
+                return;
             }
             await createAccount({
                 client_id: Number(userId),
                 account_type: accountType,
                 subtype: ownerType === "BUSINESS" ? companySubtype : subtype,
                 currency,
-                initial_balance: 0,
+                initial_balance: 1,
                 daily_limit: dailyLimit ? Number(dailyLimit) : 0,
                 monthly_limit: monthlyLimit ? Number(monthlyLimit) : 0,
                 create_card: createCard,
@@ -179,7 +203,7 @@ export default function CreateAccountPage() {
                     address: company.address,
                 } : undefined,
             });
-            navigate("/dashboard");
+            setSuccess(true);
         } catch (err) {
             setSubmitError(err.message || "Greška pri kreiranju računa.");
         } finally {
@@ -190,14 +214,54 @@ export default function CreateAccountPage() {
     const readyForSummary = accountType && currency && ownerType &&
         (ownerType === "BUSINESS" || subtype);
 
+    if (success) {
+        return (
+            <div className="ca-shell">
+                <Sidebar />
+                <div className="ca-content">
+                    <div className="ca-success-box">
+                        <h2>✅ Račun uspešno kreiran</h2>
+                        <p>Račun je dodat u sistem.</p>
+
+                        <div className="ca-actions">
+                            <button
+                                className="ca-btn-back"
+                                onClick={() => navigate("/admin/accounts")}
+                            >
+                                Nazad na dashboard
+                            </button>
+
+                            <button
+                                className="ca-btn-submit"
+                                onClick={() => {
+                                    setSuccess(false);
+                                    // reset forme ako hoćeš
+                                    setSelectedClientId("");
+                                    setAccountType("");
+                                    setCurrency("");
+                                    setOwnerType("");
+                                    setSubtype("");
+                                    setCompany(EMPTY_COMPANY);
+                                }}
+                            >
+                                Kreiraj još jedan račun
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
+
         <div className="ca-shell">
             <Sidebar/>
             <div className="ca-content">
 
                 {/* Header */}
                 <div className="ca-header">
-                    <button className="ca-back-btn" onClick={() => navigate("/dashboard")}>
+                    <button className="ca-back-btn" onClick={() => navigate("/admin/accounts")}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M15 18l-6-6 6-6" />
                         </svg>
@@ -209,6 +273,23 @@ export default function CreateAccountPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} noValidate>
+
+                    <div className="ca-section">
+                        <p className="ca-section-label">Klijent</p>
+                        <select
+                            className="ca-input"
+                            value={selectedClientId}
+                            onChange={(e) => setSelectedClientId(e.target.value)}
+                        >
+                            <option value="">Izaberite klijenta</option>
+                            {clients.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.firstName} {c.lastName} ({c.email})
+                                </option>
+                            ))}
+                        </select>
+                        {!selectedClientId && <p className="ca-error">Izaberite klijenta.</p>}
+                    </div>
 
                     {/* ── Account type ── */}
                     <div className="ca-section">
