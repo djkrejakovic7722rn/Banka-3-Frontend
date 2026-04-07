@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { getUserCards, getUserAccounts } from "../services/CardService";
 import CardsList from "../components/cards/CardsList";
 import CreateCardForm from "../components/cards/CreateCardForm";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import "./CardsPage.css";
 
@@ -12,8 +11,11 @@ function CardsPage() {
   const [cards, setCards] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState("list");
   const [message, setMessage] = useState("");
+
+  const role = localStorage.getItem("userRole");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -35,27 +37,25 @@ function CardsPage() {
         getUserAccounts()
       ]);
 
-      const filteredCards = cardsData.filter(card => {
-        const account = accountsData.find(a => a.accountNumber === card.accountNumber);
-        return account !== undefined;
-      });
-
-      setCards(filteredCards);
+      setCards(cardsData);
       setAccounts(accountsData);
     } catch (error) {
-      setMessage("Greška pri učitavanju podataka: " + error.message);
-      console.error(error);
+      setMessage("Greška pri učitavanju: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCardCreated = (newCard, updatedAccounts) => {
-    setCards([...cards, newCard]);
-    setAccounts(updatedAccounts);
-    setMessage("Kartica je uspešno kreirana!");
-    setActiveTab("list");
-    setTimeout(() => setMessage(""), 3000);
+  const handleCardRequest = async (cardData) => {
+    try {
+      await requestCard(cardData);
+      setMessage("Zahtev poslat. Proverite email za potvrdu.");
+      setActiveTab("list");
+      navigate("/cards");
+      await loadData();
+    } catch (error) {
+      setMessage("Greška: " + error.message);
+    }
   };
 
 
@@ -63,7 +63,8 @@ function CardsPage() {
     setCards(cards.map(card =>
       card.id === cardId ? { ...card, status: "Blokirana" } : card
     ));
-    setMessage("Kartica je uspešno blokirana!");
+
+    setMessage("Kartica blokirana");
     setTimeout(() => setMessage(""), 3000);
   };
 
@@ -75,14 +76,18 @@ function CardsPage() {
     <div className="cards-page">
       <Sidebar />
       <div className="cards-container">
-        <h1>Moje kartice</h1>
+        <h1>
+          {activeTab === "list" ? "Moje kartice" : "Zahtev za karticu"}
+        </h1>
 
-        {message && <div className="message success">{message}</div>}
+        {message && (
+          <div className="message success">{message}</div>
+        )}
 
         <div className="tabs">
           <button
             className={`tab-btn ${activeTab === "list" ? "active" : ""}`}
-            onClick={() => setActiveTab("list")}
+            onClick={() => navigate("/cards")}
           >
             Sve kartice ({cards.length})
           </button>
