@@ -44,7 +44,9 @@ export default function EditEmployeePage() {
 
   const [allPermissions] = useState([
     "trade_stocks",
+    "view_stocks",
     "manage_contracts",
+    "manage_insurance",
     "read_accounts",
     "write_accounts",
     "approve_loans",
@@ -75,9 +77,11 @@ export default function EditEmployeePage() {
           aktivan: employee.active ?? true,
         });
 
-        setSelectedPermissions(
-          (employee.permissions || []).map(normalize)
-        );
+        const unique = [...new Set(
+              (employee.permissions || []).map(p => normalize(p))
+            )];
+
+            setSelectedPermissions(unique);
       })
       .catch(() => setNotFound(true));
   }, [id]);
@@ -94,13 +98,13 @@ export default function EditEmployeePage() {
     const normalized = normalize(perm);
 
     setSelectedPermissions(prev => {
-      const normalizedPrev = prev.map(normalize);
+      const clean = prev.map(normalize);
 
-      if (normalizedPrev.includes(normalized)) {
-        return prev.filter(p => normalize(p) !== normalized);
+      if (clean.includes(normalized)) {
+        return clean.filter(p => p !== normalized);
       }
 
-      return [...prev, normalized];
+      return [...clean, normalized];
     });
   };
 
@@ -127,7 +131,6 @@ export default function EditEmployeePage() {
         position: form.pozicija,
         department: form.departman,
         active: form.aktivan,
-
         permissions: selectedPermissions.map(p => p.toUpperCase())
       });
 
@@ -166,47 +169,48 @@ export default function EditEmployeePage() {
           <form onSubmit={handleSubmit}>
 
             <div className="form-row-three">
-  <div className="form-group">
-    <label>Prezime</label>
-    <input name="prezime" value={form.prezime} onChange={handleChange} />
-  </div>
+              <div className="form-group">
+                <label>Prezime</label>
+                <input name="prezime" value={form.prezime} onChange={handleChange} />
+              </div>
 
-  <div className="form-group">
-    <label>Pol</label>
-    <input name="pol" value={form.pol} onChange={handleChange} />
-  </div>
+              <div className="form-group">
+                <label>Pol</label>
+                <input name="pol" value={form.pol} onChange={handleChange} />
+              </div>
 
-  <div className="form-group">
-    <label>Telefon</label>
-    <input name="telefon" value={form.telefon} onChange={handleChange} />
-  </div>
-</div>
+              <div className="form-group">
+                <label>Telefon</label>
+                <input name="telefon" value={form.telefon} onChange={handleChange} />
+              </div>
+            </div>
 
-<div className="form-grid">
-  <div className="form-group">
-    <label>Adresa</label>
-    <input name="adresa" value={form.adresa} onChange={handleChange} />
-  </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Adresa</label>
+                <input name="adresa" value={form.adresa} onChange={handleChange} />
+              </div>
 
-  <div className="form-group">
-    <label>Pozicija</label>
-    <input name="pozicija" value={form.pozicija} onChange={handleChange} />
-  </div>
+              <div className="form-group">
+                <label>Pozicija</label>
+                <input name="pozicija" value={form.pozicija} onChange={handleChange} />
+              </div>
 
-  <div className="form-group">
-    <label>Departman</label>
-    <input name="departman" value={form.departman} onChange={handleChange} />
-  </div>
-</div>
-            <label>
-              Aktivan
+              <div className="form-group">
+                <label>Departman</label>
+                <input name="departman" value={form.departman} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Aktivan</label>
               <input
                 type="checkbox"
                 name="aktivan"
                 checked={form.aktivan}
                 onChange={handleChange}
               />
-            </label>
+            </div>
 
             <div className="permissions-section">
               <span className="permissions-label">Permisije</span>
@@ -216,7 +220,7 @@ export default function EditEmployeePage() {
                   <label key={perm} className="permission-checkbox">
                     <input
                       type="checkbox"
-                      checked={selectedPermissions.includes(perm)}
+                      checked={selectedPermissions.includes(normalize(perm))}
                       onChange={() => togglePermission(perm)}
                     />
                     <span className="checkmark"></span>
@@ -228,9 +232,19 @@ export default function EditEmployeePage() {
               </div>
             </div>
 
-            <button type="submit" className="create-btn create-btn-primary">
-              {loading ? "Čuvanje..." : "Sačuvaj izmene"}
-            </button>
+            <div className="form-actions">
+              <button type="submit" className="create-btn create-btn-primary">
+                {loading ? "Čuvanje..." : "Sačuvaj izmene"}
+              </button>
+
+              <button
+                type="button"
+                className="create-btn"
+                onClick={() => navigate(-1)}
+              >
+                Otkaži
+              </button>
+            </div>
 
           </form>
 
