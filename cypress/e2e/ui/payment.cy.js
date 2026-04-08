@@ -78,7 +78,7 @@ describe("PaymentPage", () => {
       const body = interception.request.body;
       expect(body.sender_account).to.eq("265-0000000011234-56");
       expect(body.recipient_account).to.eq("265000000009987612");
-      expect(body.amount).to.eq(1500);
+      expect(body.amount).to.eq(150000);
     });
   });
 

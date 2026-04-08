@@ -52,6 +52,15 @@ export async function getTransactions(filters = {}) {
     throw error;
   }
 }
+// Konverzija: dinari → pare (za slanje na API)
+export function toCents(amount) {
+    return Math.round(Number(amount) * 100);
+}
+
+// Konverzija: pare → dinari (za prikaz)
+export function fromCents(amount) {
+    return Number(amount) / 100;
+}
 
 export async function createRecipient(recipientData) {
   const response = await api.post("/recipients", recipientData);

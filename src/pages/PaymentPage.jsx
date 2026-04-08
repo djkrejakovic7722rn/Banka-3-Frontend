@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAccounts } from "../services/AccountService";
 import { transferFunds } from "../services/TransactionService";
-import { getRecipients, createRecipient } from "../services/PaymentService";
+import {getRecipients, createRecipient} from "../services/PaymentService";
 import TotpModal from "../components/TotpModal";
 import Sidebar from "../components/Sidebar";
 import useFailedAttempts, { BLOCKED_MESSAGE, MAX_FAILED_ATTEMPTS } from "../utils/useFailedAttempts";
@@ -141,7 +141,7 @@ export default function PaymentPage() {
         setSubmitting(true);
         setTotpError("");
         try {
-            await transferFunds({ ...form, amount: Number(form.amount) }, totpCode);
+            await transferFunds({ ...form, amount: Math.round(Number(form.amount) * 100) }, totpCode);
             setShowTotp(false);
             setSuccessMsg("Plaćanje je uspešno izvršeno!");
             setForm(EMPTY_FORM);
