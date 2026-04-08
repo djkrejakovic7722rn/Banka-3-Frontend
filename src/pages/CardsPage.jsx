@@ -18,6 +18,8 @@ function CardsPage() {
   const [activeTab, setActiveTab] = useState("list");
   const [message, setMessage] = useState("");
 
+  const role = sessionStorage.getItem("userRole");
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get("tab");
