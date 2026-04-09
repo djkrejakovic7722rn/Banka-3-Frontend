@@ -37,34 +37,24 @@ export default function LoginPage() {
     setMessage("");
 
     try {
-      // 1. Prvo radimo login da dobijemo tokene
       const data = await login(email, password);
       reset();
 
-      // 2. OBAVEZNO upisujemo tokene odmah, jer sledeći API pozivi 
-      // u ClientService/EmployeeService koriste ove tokene iz sessionStorage
       sessionStorage.setItem("accessToken", data.accessToken);
       sessionStorage.setItem("refreshToken", data.refreshToken);
       sessionStorage.setItem("permissions", JSON.stringify(data.permissions));
-
-      // 3. Utvrđujemo ulogu (Role Detection)
-      // Pošto backend ne vraća ulogu u login odgovoru, proveravamo bazu klijenata
-      sessionStorage.setItem("permissions", JSON.stringify(data.permissions));
       const permissions = data.permissions || [];
 
-      if (permissions.includes("admin")) {
-        sessionStorage.setItem("userRole", "employee");  // admin JE employee
-        navigate("/employees");
-      } else if (permissions.length > 0) {
+      if (permissions.includes("admin") || permissions.length > 0) {
         sessionStorage.setItem("userRole", "employee");
         navigate("/employees");
       } else {
         sessionStorage.setItem("userRole", "client");
         navigate("/dashboard");
       }
-
     } catch (err) {
       console.error("Login error:", err);
+
       if (err.response) {
         const status = err.response.status;
         const serverMsg = err.response.data;
@@ -72,7 +62,6 @@ export default function LoginPage() {
           typeof serverMsg === "string"
             ? serverMsg
             : serverMsg?.error || serverMsg?.message || "";
-
         const normalized = String(serverMsgText).toLowerCase();
 
         if (
@@ -88,7 +77,6 @@ export default function LoginPage() {
             "Nalog još nije aktiviran. Proverite email i postavite lozinku putem linka za aktivaciju (ili zatražite novi link)."
           );
         } else if (status === 401) {
-        if (err.response.status === 401) {
           increment();
           setMessage("Pogrešan email ili lozinka");
         } else {
