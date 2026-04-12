@@ -10,8 +10,7 @@ function fmt(amount, currency) {
     const formattedAmount = new Intl.NumberFormat("sr-RS", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(Math.abs(amount));
-
+    }).format(Math.abs(amount) / 100);
     return currency ? `${formattedAmount} ${currency}` : formattedAmount;
 }
 
