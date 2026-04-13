@@ -59,7 +59,7 @@ export default function TransferPage() {
     setPendingPayload({
       from_account: fromAccount,
       to_account: toAccount,
-      amount: Number(amount),
+        amount: Math.round(Number(amount) * 100),
     });
     setTotpError("");
     setShowTotp(true);
@@ -204,11 +204,12 @@ export default function TransferPage() {
               </div>
               <div className="pay-summary-row">
                 <span>Iznos</span>
-                <span>
-                  {new Intl.NumberFormat("sr-RS", {
-                    minimumFractionDigits: 2,
+                  <span>
+                {new Intl.NumberFormat("sr-RS", {
+                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  }).format(Number(amount))}
+                }).format(Number(amount))}{" "}
+                      {accounts.find((acc) => acc.account_number === fromAccount)?.currency || ""}
                 </span>
               </div>
             </div>
