@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getUserCards, getUserAccounts, requestCard } from "../services/CardService";
 import CardsList from "../components/cards/CardsList";
 import CreateCardForm from "../components/cards/CreateCardForm";
+import TotpModal from "../components/TotpModal.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import "./CardsPage.css";
@@ -15,6 +16,9 @@ function CardsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("list");
   const [message, setMessage] = useState("");
+  const [showTotp, setShowTotp] = useState(false);
+  const [totpError, setTotpError] = useState("");
+  const [pendingCardData, setPendingCardData] = useState(null);
 
   const role = sessionStorage.getItem("userRole");
 
@@ -58,31 +62,45 @@ function CardsPage() {
     }
   };
 
-  const handleCardRequest = async (cardData) => {
-    try {
-      await requestCard(cardData);
+  const handleCardRequest = (cardData) => {
+    setPendingCardData(cardData);
+    setTotpError("");
+    setShowTotp(true);
+  };
 
-      setMessage("Kartica uspešno zatražena! Proverite backend log.");
+  const handleTotpConfirm = async (code) => {
+    try {
+      await requestCard(pendingCardData, code);
+
+      setShowTotp(false);
+      setPendingCardData(null);
+      setMessage("Kartica uspešno kreirana!");
 
       navigate("/cards", { replace: true });
-
       await loadData();
 
       setTimeout(() => setMessage(""), 3000);
 
     } catch (error) {
-      setMessage("Greška: " + error.message);
+      const msg = error.response?.data?.message || error.response?.data?.error || "";
+      if (msg.toLowerCase().includes("totp") || error.response?.status === 401) {
+        setTotpError("Neispravan TOTP kod. Pokušajte ponovo.");
+      } else {
+        setShowTotp(false);
+        setMessage("Greška: " + error.message);
+      }
     }
   };
 
-  const handleCardBlocked = (cardId) => {
+  const handleCardBlocked = (cardId, newStatus) => {
+    const status = newStatus || "Blokirana";
     setCards(prev =>
       prev.map(card =>
-        card.id === cardId ? { ...card, status: "Blokirana" } : card
+        card.id === cardId ? { ...card, status } : card
       )
     );
 
-    setMessage("Kartica blokirana");
+    setMessage(status === "Aktivna" ? "Kartica odblokirana" : "Kartica blokirana");
     setTimeout(() => setMessage(""), 3000);
   };
 
@@ -96,7 +114,9 @@ function CardsPage() {
 
       <div className="cards-container">
         <h1>
-          {activeTab === "list" ? "Moje kartice" : "Zahtev za karticu"}
+          {activeTab === "list"
+            ? (role === "employee" ? "Sve kartice" : "Moje kartice")
+            : "Zahtev za karticu"}
         </h1>
 
         {message && (
@@ -136,6 +156,14 @@ function CardsPage() {
           />
         )}
       </div>
+
+      {showTotp && (
+        <TotpModal
+          onConfirm={handleTotpConfirm}
+          onCancel={() => { setShowTotp(false); setPendingCardData(null); }}
+          error={totpError}
+        />
+      )}
     </div>
   );
 }

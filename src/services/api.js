@@ -19,6 +19,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Refresh queue — backend koristi rotating refresh tokene (single-use).
+// Bez ovoga, paralelni 401 odgovori (npr. AccountDetailsPage šalje 3 zahteva
+// istovremeno) bi svi pokušali refresh sa istim tokenom. Drugi pokušaj bi
+// izazvao "token mismatch: possible reuse attack" i revokaciju svih tokena.
+let refreshPromise = null;
+
+function doRefresh() {
+  if (refreshPromise) return refreshPromise;
+
+  const storedRefresh = sessionStorage.getItem("refreshToken");
+  if (!storedRefresh) {
+    return Promise.reject(new Error("no refresh token"));
+  }
+
+  refreshPromise = api
+    .post("/token/refresh", { refresh_token: storedRefresh })
+    .then(({ data }) => {
+      if (getIsLoggingOut()) throw new Error("logout in progress");
+      const newAccess = data.access_token || data.accessToken;
+      const newRefresh = data.refresh_token || data.refreshToken;
+      sessionStorage.setItem("accessToken", newAccess);
+      sessionStorage.setItem("refreshToken", newRefresh);
+      return newAccess;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -38,26 +69,8 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      const storedRefresh = sessionStorage.getItem("refreshToken");
-      if (!storedRefresh) {
-        clearAuthState();
-        sessionStorage.setItem("sessionExpired", "1");
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await api.post("/token/refresh", {
-          refresh_token: storedRefresh,
-        });
-        // Drugi put proveravamo flag — logout se mogao desiti tokom await-a.
-        if (getIsLoggingOut()) {
-          return Promise.reject(error);
-        }
-        const newAccess = data.access_token || data.accessToken;
-        const newRefresh = data.refresh_token || data.refreshToken;
-        sessionStorage.setItem("accessToken", newAccess);
-        sessionStorage.setItem("refreshToken", newRefresh);
+        const newAccess = await doRefresh();
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
       } catch {

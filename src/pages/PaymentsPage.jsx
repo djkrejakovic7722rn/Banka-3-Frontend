@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getTransactions } from "../services/PaymentService";
+import { getAccountByNumber } from "../services/AccountService";
 import Sidebar from "../components/Sidebar.jsx";
 import "./PaymentsPage.css";
 
@@ -278,13 +279,49 @@ const FILTERS = [
 // ─── Payment detail ──────────────────────────────────────────
 function PaymentDetail({ tx, onBack }) {
   const cfg = STATUS_CFG[tx.status] ?? STATUS_CFG["Realizovano"];
+  const isTransfer = !tx.payment_code;
+
+  const [fromAccount, setFromAccount] = useState(null);
+  const [toAccount, setToAccount] = useState(null);
+
+  useEffect(() => {
+    if (!isTransfer) return;
+    if (tx.from_account) {
+      getAccountByNumber(tx.from_account).then(setFromAccount).catch(() => {});
+    }
+    if (tx.to_account) {
+      getAccountByNumber(tx.to_account).then(setToAccount).catch(() => {});
+    }
+  }, [tx, isTransfer]);
+
+  const detailRows = isTransfer
+    ? [
+        ["Sa računa",                tx.from_account],
+        ["Stanje posle prenosa",     fromAccount ? fmt(fromAccount.balance, fromAccount.currency) : "..."],
+        ["Na račun",                 tx.to_account],
+        ["Stanje posle prenosa",     toAccount ? fmt(toAccount.balance, toAccount.currency) : "..."],
+        ["Poslat iznos",             fmt(tx.initial_amount, tx.currency)],
+        ["Primljen iznos",           fmt(tx.final_amount, tx.currency)],
+        ["Naknada",                  tx.fee > 0 ? fmt(tx.fee, tx.currency) : "0"],
+        ["Datum i vreme",            formatDate(tx.timestamp)],
+        ["Status",                   cfg.label],
+      ]
+    : [
+        ["Račun primaoca", tx.to_account],
+        ["Račun platioca", tx.from_account],
+        ["Svrha plaćanja", tx.purpose],
+        ["Šifra plaćanja", tx.payment_code],
+        ["Poziv na broj",  tx.reference_number],
+        ["Datum i vreme",  formatDate(tx.timestamp)],
+        ["Status",         cfg.label],
+      ];
 
   return (
     <div className="pp-content">
         <Sidebar/>
       <div className="pp-top-row">
         <button className="pp-back-btn" onClick={onBack}>‹</button>
-        <span className="pp-section-title">Detalji plaćanja</span>
+        <span className="pp-section-title">{isTransfer ? "Detalji prenosa" : "Detalji plaćanja"}</span>
       </div>
 
       {/* Status banner */}
@@ -302,18 +339,10 @@ function PaymentDetail({ tx, onBack }) {
 
       {/* Detail rows */}
       <div className="pp-detail-card">
-        {[
-          ["Račun primaoca", tx.to_account],
-          ["Račun platioca", tx.from_account],
-          ["Svrha plaćanja", tx.purpose],
-          ["Šifra plaćanja", tx.payment_code],
-          ["Poziv na broj",  tx.reference_number],
-          ["Datum i vreme",  formatDate(tx.timestamp)],
-          ["Status",         cfg.label],
-        ].map(([label, value], i) => (
+        {detailRows.map(([label, value], i) => (
           <div key={label} className={`pp-drow${i > 0 ? " pp-drow--border" : ""}`}>
             <span className="pp-drow-label">{label}</span>
-            <span className="pp-drow-value">{value}</span>
+            <span className="pp-drow-value">{value || "—"}</span>
           </div>
         ))}
       </div>

@@ -19,9 +19,15 @@ function CardItem({ card, account, isSelected, onSelect, onCardBlocked }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showCVV, setShowCVV] = useState(false);
+  const role = sessionStorage.getItem("userRole");
+
+  const isBlocked = card.status === "Blokirana";
 
   const handleBlock = async () => {
-    if (!window.confirm("Da li ste sigurni da želite da blokirate ovu karticu?")) {
+    const msg = isBlocked
+      ? "Da li ste sigurni da želite da odblokirate ovu karticu?"
+      : "Da li ste sigurni da želite da blokirate ovu karticu?";
+    if (!window.confirm(msg)) {
       return;
     }
 
@@ -29,7 +35,7 @@ function CardItem({ card, account, isSelected, onSelect, onCardBlocked }) {
       setLoading(true);
       setError("");
       await blockCard(card.cardNumber);
-      onCardBlocked(card.id);
+      onCardBlocked(card.id, isBlocked ? "Aktivna" : "Blokirana");
     } catch (err) {
       setError(err.message);
       console.error(err);
@@ -219,7 +225,17 @@ function CardItem({ card, account, isSelected, onSelect, onCardBlocked }) {
                 </button>
               )}
 
-              {card.status === "Blokirana" && (
+              {card.status === "Blokirana" && role === "employee" && (
+                <button
+                  className="action-btn block-btn"
+                  onClick={handleBlock}
+                  disabled={loading}
+                >
+                  {loading ? "⏳ Odblokiravanje..." : "🔓 Odblokiraj Karticu"}
+                </button>
+              )}
+
+              {card.status === "Blokirana" && role !== "employee" && (
                 <div className="status-alert warning">
                   <span className="alert-icon">⚠️</span>
                   <div className="alert-content">
