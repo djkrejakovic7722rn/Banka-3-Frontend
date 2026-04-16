@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getExchangeRates, performExchange } from "../services/ExchangeService";
+import { getExchangeRates } from "../services/ExchangeService";
 import { getAccounts } from "../services/AccountService";
+import { createTransfer } from "../services/PaymentService";
 import Sidebar from "../components/Sidebar.jsx";
+import TotpModal from "../components/TotpModal.jsx";
 import "./ExchangePage.css";
 
 function fmt(amount, currency) {
@@ -31,6 +33,8 @@ export default function ExchangePage() {
   const [loading, setLoading] = useState(true);
   const [exchanging, setExchanging] = useState(false);
   const [error, setError] = useState("");
+  const [showTotp, setShowTotp] = useState(false);
+  const [totpError, setTotpError] = useState("");
   const [success, setSuccess] = useState("");
   const [showRatesModal, setShowRatesModal] = useState(false);
 
@@ -43,7 +47,7 @@ export default function ExchangePage() {
           getAccounts(),
         ]);
         if (!cancelled) {
-          const ratesMap = {};
+          const ratesMap = { RSD: 1 };
           (ratesData || []).forEach((r) => {
             ratesMap[r.currencyCode] = r.middleRate;
           });
@@ -125,7 +129,7 @@ export default function ExchangePage() {
     setError("");
   };
 
-  const handleExchange = async () => {
+  const handleExchange = () => {
     const parsed = parseFloat(amount);
 
     if (!parsed || parsed <= 0) {
@@ -149,19 +153,37 @@ export default function ExchangePage() {
       return;
     }
 
+    setError("");
+    setTotpError("");
+    setShowTotp(true);
+  };
+
+  const handleTotpConfirm = async (code) => {
+    const parsed = parseFloat(amount);
+
     setExchanging(true);
     setError("");
     setSuccess("");
     setResult(null);
 
     try {
-      const res = await performExchange(fromAccount, toAccount, parsed);
-      setResult(res);
-      setSuccess(
-        `Uspešno konvertovano ${fmt(res.initial_amount, fromCurrency)} → ${fmt(res.final_amount, res.currency)}`,
+      const res = await createTransfer(
+        { from_account: fromAccount, to_account: toAccount, amount: parsed },
+        code,
       );
-    } catch {
-      setError("Greška pri izvršavanju konverzije.");
+      setResult(res);
+      setShowTotp(false);
+      setSuccess(
+        `Uspešno konvertovano ${fmt(parsed, fromCurrency)} → ${fmt(res.final_amount || res.end_amount, toCurrency)}`,
+      );
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || "";
+      if (msg.toLowerCase().includes("totp") || err.response?.status === 401) {
+        setTotpError("Neispravan TOTP kod. Pokušajte ponovo.");
+      } else {
+        setShowTotp(false);
+        setError("Greška pri izvršavanju konverzije.");
+      }
     } finally {
       setExchanging(false);
     }
@@ -373,11 +395,17 @@ export default function ExchangePage() {
             <label className="ex-label">Konvertovani iznos</label>
             <input
               className="ex-input"
-              value={
-                convertedAmount != null ? fmt(convertedAmount, toCurrency) : ""
-              }
-              readOnly
-              placeholder="Biće automatski izračunato"
+              type="number"
+              min="0"
+              step="0.01"
+              value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                setResult(null);
+                setSuccess("");
+                setError("");
+              }}
+              placeholder="Unesite iznos"
             />
           </div>
 
@@ -443,6 +471,15 @@ export default function ExchangePage() {
           </button>
         </div>
       </div>
+
+      {showTotp && (
+        <TotpModal
+          onConfirm={handleTotpConfirm}
+          onCancel={() => setShowTotp(false)}
+          error={totpError}
+          loading={exchanging}
+        />
+      )}
     </div>
   );
 }

@@ -34,13 +34,13 @@ export async function getUserAccounts() {
   }));
 }
 
-export async function requestCard(cardData) {
+export async function requestCard(cardData, totpCode) {
+  const config = totpCode ? { headers: { TOTP: totpCode } } : {};
   const response = await api.post("/cards", {
     account_number: normalizeAccountNumberInput(cardData.accountNumber),
-
     card_type: "DEBIT",
     card_brand: "VISA",
-  });
+  }, config);
 
   return response.data;
 }
